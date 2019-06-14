@@ -1,5 +1,6 @@
 target/
 logs/
+sens-logs/
 !.mvn/wrapper/maven-wrapper.jar
 
 ### STS ###
