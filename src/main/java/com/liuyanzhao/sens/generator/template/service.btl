@@ -1,0 +1,25 @@
+package ${entity.servicePackage};
+
+import com.liuyanzhao.sens.base.SensBaseService;
+import ${entity.entityPackage}.${entity.className};
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.liuyanzhao.sens.common.vo.SearchVo;
+
+import java.util.List;
+
+/**
+ * ${entity.description}接口
+ * @author ${entity.author}
+ */
+public interface ${entity.className}Service extends SensBaseService<${entity.className},${entity.primaryKeyType}> {
+
+    /**
+    * 多条件分页获取
+    * @param ${entity.classNameLowerCase}
+    * @param searchVo
+    * @param pageable
+    * @return
+    */
+    Page<${entity.className}> findByCondition(${entity.className} ${entity.classNameLowerCase}, SearchVo searchVo, Pageable pageable);
+}

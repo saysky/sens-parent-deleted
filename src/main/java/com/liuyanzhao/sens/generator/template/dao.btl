@@ -1,0 +1,14 @@
+package ${entity.daoPackage};
+
+import com.liuyanzhao.sens.base.SensBaseDao;
+import ${entity.entityPackage}.${entity.className};
+
+import java.util.List;
+
+/**
+ * ${entity.description}数据处理层
+ * @author ${entity.author}
+ */
+public interface ${entity.className}Dao extends SensBaseDao<${entity.className},${entity.primaryKeyType}> {
+
+}
