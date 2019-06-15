@@ -5,8 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.liuyanzhao</groupId>
-    <artifactId>sens-blog</artifactId>
+    <artifactId>sens-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
+
+    <modules>
+        <module>sens-core</module>
+        <module>sens-blog</module>
+        <module>sens-shop</module>
+    </modules>
 
     <parent>
         <groupId>org.springframework.boot</groupId>

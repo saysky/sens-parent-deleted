@@ -25,7 +25,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableAsync
 // 启用自带定时任务
 @EnableScheduling
-public class SensApplication {
+public class CoreApplication {
 
     @Primary
     @Bean
@@ -35,6 +35,6 @@ public class SensApplication {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(SensApplication.class, args);
+        SpringApplication.run(CoreApplication.class, args);
     }
 }
