@@ -14,6 +14,7 @@ import com.qiniu.storage.UploadManager;
 import com.qiniu.storage.model.DefaultPutRet;
 import com.qiniu.util.Auth;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.common.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -99,6 +100,9 @@ public class QiniuUtil {
         try {
             Response response = getUploadManager(getConfiguration(os.getZone())).put(inputStream, key, upToken, null, null);
             DefaultPutRet putRet = new Gson().fromJson(response.bodyString(), DefaultPutRet.class);
+            if(!Strings.isNullOrEmpty(os.getCdnDomain())) {
+                return os.getCdnHttp() + os.getCdnDomain() + "/" + putRet.key;
+            }
             return os.getHttp() + os.getEndpoint() + "/" + putRet.key;
         } catch (QiniuException ex) {
             Response r = ex.response;

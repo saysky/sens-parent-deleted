@@ -29,6 +29,12 @@ public class OssSetting implements Serializable{
     @ApiModelProperty(value = "http")
     private String http;
 
+    @ApiModelProperty(value = "cdnHttp")
+    private String cdnHttp;
+
+    @ApiModelProperty(value = "cdn域名")
+    private String cdnDomain;
+
     @ApiModelProperty(value = "zone存储区域")
     private Integer zone;
 
@@ -38,6 +44,6 @@ public class OssSetting implements Serializable{
     @ApiModelProperty(value = "本地存储路径")
     private String filePath;
 
-    @ApiModelProperty(value = "是否改变secrectKey")
+    @ApiModelProperty(value = "是否改变secretKey")
     private Boolean changed;
 }

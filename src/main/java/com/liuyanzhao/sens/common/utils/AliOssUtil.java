@@ -7,6 +7,7 @@ import cn.hutool.core.util.StrUtil;
 import com.aliyun.oss.OSSClient;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.common.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -59,6 +60,9 @@ public class AliOssUtil {
         OSSClient ossClient = new OSSClient(os.getHttp() + os.getEndpoint(), os.getAccessKey(), os.getSecretKey());
         ossClient.putObject(os.getBucket(), key, inputStream);
         ossClient.shutdown();
+        if(!Strings.isNullOrEmpty(os.getCdnDomain())) {
+            return os.getCdnHttp() + os.getCdnDomain() + "/" + key;
+        }
         return os.getHttp() + os.getBucket() + "." + os.getEndpoint() + "/" + key;
     }
 

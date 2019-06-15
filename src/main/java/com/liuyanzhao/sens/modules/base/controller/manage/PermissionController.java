@@ -62,74 +62,75 @@ public class PermissionController {
 
     @RequestMapping(value = "/getMenuList", method = RequestMethod.GET)
     @ApiOperation(value = "获取用户页面菜单数据")
-    public Result<List<MenuVo>> getAllMenuList(){
+    public Result<List<MenuVo>> getAllMenuList() {
 
         List<MenuVo> menuList = new ArrayList<>();
         // 读取缓存
         User u = securityUtil.getCurrUser();
         String key = "permission::userMenuList:" + u.getId();
         String v = redisTemplate.opsForValue().get(key);
-        if(StrUtil.isNotBlank(v)){
-            menuList = new Gson().fromJson(v, new TypeToken<List<Permission>>(){}.getType());
+        if (StrUtil.isNotBlank(v)) {
+            menuList = new Gson().fromJson(v, new TypeToken<List<Permission>>() {
+            }.getType());
             return new ResultUtil<List<MenuVo>>().setData(menuList);
         }
 
         // 用户所有权限 已排序去重
         List<Permission> list = iPermissionService.findByUserId(u.getId());
 
-        // 筛选0级页面
-        for(Permission p : list){
-            if(CommonConstant.PERMISSION_NAV.equals(p.getType())&&CommonConstant.LEVEL_ZERO.equals(p.getLevel())){
+        // 筛选0级页面（顶部菜单，横向的）
+        for (Permission p : list) {
+            if (CommonConstant.PERMISSION_NAV.equals(p.getType()) && CommonConstant.LEVEL_ZERO.equals(p.getLevel())) {
                 menuList.add(DtoUtil.permissionToMenuVo(p));
             }
         }
-        // 筛选一级页面
+        // 筛选一级页面（侧边菜单，一级）
         List<MenuVo> firstMenuList = new ArrayList<>();
-        for(Permission p : list){
-            if(CommonConstant.PERMISSION_PAGE.equals(p.getType())&&CommonConstant.LEVEL_ONE.equals(p.getLevel())){
+        for (Permission p : list) {
+            if (CommonConstant.PERMISSION_PAGE.equals(p.getType()) && CommonConstant.LEVEL_ONE.equals(p.getLevel())) {
                 firstMenuList.add(DtoUtil.permissionToMenuVo(p));
             }
         }
-        // 筛选二级页面
+        // 筛选二级页面 （侧边菜单，一级）
         List<MenuVo> secondMenuList = new ArrayList<>();
-        for(Permission p : list){
-            if(CommonConstant.PERMISSION_PAGE.equals(p.getType())&&CommonConstant.LEVEL_TWO.equals(p.getLevel())){
+        for (Permission p : list) {
+            if (CommonConstant.PERMISSION_PAGE.equals(p.getType()) && CommonConstant.LEVEL_TWO.equals(p.getLevel())) {
                 secondMenuList.add(DtoUtil.permissionToMenuVo(p));
             }
         }
         // 筛选二级页面拥有的按钮权限
         List<MenuVo> buttonPermissions = new ArrayList<>();
-        for(Permission p : list){
-            if(CommonConstant.PERMISSION_OPERATION.equals(p.getType())&&CommonConstant.LEVEL_THREE.equals(p.getLevel())){
+        for (Permission p : list) {
+            if (CommonConstant.PERMISSION_OPERATION.equals(p.getType()) && CommonConstant.LEVEL_THREE.equals(p.getLevel())) {
                 buttonPermissions.add(DtoUtil.permissionToMenuVo(p));
             }
         }
 
-        // 匹配二级页面拥有权限
-        for(MenuVo m : secondMenuList){
+        // 匹配二级页面拥有权限(将按钮封装到二级页面中)
+        for (MenuVo m : secondMenuList) {
             List<String> permTypes = new ArrayList<>();
-            for(MenuVo me : buttonPermissions){
-                if(m.getId().equals(me.getParentId())){
+            for (MenuVo me : buttonPermissions) {
+                if (m.getId().equals(me.getParentId())) {
                     permTypes.add(me.getButtonType());
                 }
             }
             m.setPermTypes(permTypes);
         }
-        // 匹配一级页面拥有二级页面
-        for(MenuVo m : firstMenuList){
+        // 匹配一级页面拥有二级页面(将二级页面封装到一级页面)
+        for (MenuVo m : firstMenuList) {
             List<MenuVo> secondMenu = new ArrayList<>();
-            for(MenuVo me : secondMenuList){
-                if(m.getId().equals(me.getParentId())){
+            for (MenuVo me : secondMenuList) {
+                if (m.getId().equals(me.getParentId())) {
                     secondMenu.add(me);
                 }
             }
             m.setChildren(secondMenu);
         }
-        // 匹配0级页面拥有一级页面
-        for(MenuVo m : menuList){
+        // 匹配0级页面拥有一级页面(将一级页面封装到0级页面)
+        for (MenuVo m : menuList) {
             List<MenuVo> firstMenu = new ArrayList<>();
-            for(MenuVo me : firstMenuList){
-                if(m.getId().equals(me.getParentId())){
+            for (MenuVo me : firstMenuList) {
+                if (m.getId().equals(me.getParentId())) {
                     firstMenu.add(me);
                 }
             }
@@ -144,20 +145,20 @@ public class PermissionController {
     @RequestMapping(value = "/getAllList", method = RequestMethod.GET)
     @ApiOperation(value = "获取权限菜单树")
     @Cacheable(key = "'allList'")
-    public Result<List<Permission>> getAllList(){
+    public Result<List<Permission>> getAllList() {
 
         // 0级
         List<Permission> list0 = permissionService.findByLevelOrderBySortOrder(CommonConstant.LEVEL_ZERO);
-        for(Permission p0 : list0){
+        for (Permission p0 : list0) {
             // 一级
             List<Permission> list1 = permissionService.findByParentIdOrderBySortOrder(p0.getId());
             p0.setChildren(list1);
             // 二级
-            for(Permission p1 : list1){
+            for (Permission p1 : list1) {
                 List<Permission> children1 = permissionService.findByParentIdOrderBySortOrder(p1.getId());
                 p1.setChildren(children1);
                 // 三级
-                for(Permission p2 : children1){
+                for (Permission p2 : children1) {
                     List<Permission> children2 = permissionService.findByParentIdOrderBySortOrder(p2.getId());
                     p2.setChildren(children2);
                 }
@@ -169,12 +170,12 @@ public class PermissionController {
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     @ApiOperation(value = "添加")
     @CacheEvict(key = "'menuList'")
-    public Result<Permission> add(@ModelAttribute Permission permission){
+    public Result<Permission> add(@ModelAttribute Permission permission) {
 
         // 判断拦截请求的操作权限按钮名是否已存在
-        if(CommonConstant.PERMISSION_OPERATION.equals(permission.getType())){
+        if (CommonConstant.PERMISSION_OPERATION.equals(permission.getType())) {
             List<Permission> list = permissionService.findByTitle(permission.getTitle());
-            if(list!=null&&list.size()>0){
+            if (list != null && list.size() > 0) {
                 return new ResultUtil<Permission>().setErrorMsg("名称已存在");
             }
         }
@@ -188,15 +189,15 @@ public class PermissionController {
 
     @RequestMapping(value = "/edit", method = RequestMethod.POST)
     @ApiOperation(value = "编辑")
-    public Result<Permission> edit(@ModelAttribute Permission permission){
+    public Result<Permission> edit(@ModelAttribute Permission permission) {
 
         // 判断拦截请求的操作权限按钮名是否已存在
-        if(CommonConstant.PERMISSION_OPERATION.equals(permission.getType())){
+        if (CommonConstant.PERMISSION_OPERATION.equals(permission.getType())) {
             // 若名称修改
             Permission p = permissionService.get(permission.getId());
-            if(!p.getTitle().equals(permission.getTitle())){
+            if (!p.getTitle().equals(permission.getTitle())) {
                 List<Permission> list = permissionService.findByTitle(permission.getTitle());
-                if(list!=null&&list.size()>0){
+                if (list != null && list.size() > 0) {
                     return new ResultUtil<Permission>().setErrorMsg("名称已存在");
                 }
             }
@@ -218,15 +219,15 @@ public class PermissionController {
     @RequestMapping(value = "/delByIds/{ids}", method = RequestMethod.DELETE)
     @ApiOperation(value = "批量通过id删除")
     @CacheEvict(key = "'menuList'")
-    public Result<Object> delByIds(@PathVariable String[] ids){
+    public Result<Object> delByIds(@PathVariable String[] ids) {
 
-        for(String id:ids){
+        for (String id : ids) {
             List<RolePermission> list = rolePermissionService.findByPermissionId(id);
-            if(list!=null&&list.size()>0){
+            if (list != null && list.size() > 0) {
                 return new ResultUtil<Object>().setErrorMsg("删除失败，包含正被角色使用关联的菜单或权限");
             }
         }
-        for(String id:ids){
+        for (String id : ids) {
             permissionService.delete(id);
         }
         //重新加载权限
@@ -238,9 +239,9 @@ public class PermissionController {
 
     @RequestMapping(value = "/search", method = RequestMethod.GET)
     @ApiOperation(value = "搜索菜单")
-    public Result<List<Permission>> searchPermissionList(@RequestParam String title){
+    public Result<List<Permission>> searchPermissionList(@RequestParam String title) {
 
-        List<Permission> list = permissionService.findByTitleLikeOrderBySortOrder("%"+title+"%");
+        List<Permission> list = permissionService.findByTitleLikeOrderBySortOrder("%" + title + "%");
         return new ResultUtil<List<Permission>>().setData(list);
     }
 }

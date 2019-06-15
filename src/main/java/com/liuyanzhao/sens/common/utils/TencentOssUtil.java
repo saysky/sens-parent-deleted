@@ -14,6 +14,7 @@ import com.qcloud.cos.region.Region;
 import com.qcloud.cos.transfer.Copy;
 import com.qcloud.cos.transfer.TransferManager;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.common.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -84,6 +85,10 @@ public class TencentOssUtil {
         PutObjectRequest putObjectRequest = new PutObjectRequest(os.getBucket(), key, inputStream, objectMetadata);
         PutObjectResult putObjectResult = cosClient.putObject(putObjectRequest);
         cosClient.shutdown();
+
+        if(!Strings.isNullOrEmpty(os.getCdnDomain())) {
+            return os.getCdnHttp() + os.getCdnDomain() + "/" + key;
+        }
         return os.getHttp() + os.getEndpoint() + "/" + key;
     }
 
